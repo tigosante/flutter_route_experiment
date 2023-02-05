@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:route_app/screens/404/not_found_controller.dart' show NotFoundController;
 
 class NotFoundScreen extends StatelessWidget {
-  const NotFoundScreen({super.key});
+  const NotFoundScreen({
+    super.key,
+    required NotFoundController controller,
+  }) : _controller = controller;
+
+  final NotFoundController _controller;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +20,7 @@ class NotFoundScreen extends StatelessWidget {
           Text("404"),
           SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: _controller.gotToHome,
             child: Text("back to home"),
           ),
         ],

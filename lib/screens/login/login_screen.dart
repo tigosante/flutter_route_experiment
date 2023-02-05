@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:route_app/screens/login/login_controller.dart' show LoginController;
 
-class StoreScreen extends StatelessWidget {
-  const StoreScreen({super.key});
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({
+    super.key,
+    required LoginController controller,
+  }) : _controller = controller;
 
-  Widget get _sizeBox => SizedBox(height: 16);
+  final LoginController _controller;
 
   @override
   Widget build(BuildContext context) {
@@ -14,15 +18,10 @@ class StoreScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text("store screen"),
-          _sizeBox,
+          SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () {},
-            child: Text("back"),
-          ),
-          _sizeBox,
-          ElevatedButton(
-            onPressed: () {},
-            child: Text("profile"),
+            onPressed: _controller.login,
+            child: Text("login"),
           ),
         ],
       ),

@@ -1,22 +1,22 @@
-import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
-import 'package:flutter/material.dart' show RouteInformationParser;
-import 'package:qlevar_router/qlevar_router.dart'
-    show QCustomPage, QMiddlewareBuilder, QPlatformPage, QR, QRoute, QRouteInformationParser;
-import 'package:route_app/router/deferred_guard.dart' show DeferredLoader;
+import 'package:flutter/material.dart' show RouteInformationParser, RouterDelegate;
+import 'package:go_router/go_router.dart' show GoRoute, GoRouter;
+import 'package:route_app/screens/404/not_found_controller.dart' show NotFoundController;
 import 'package:route_app/screens/404/not_found_screen.dart' show NotFoundScreen;
 import 'package:route_app/screens/home/home_controller.dart' show HomeController;
-import 'package:route_app/screens/home/home_screen.dart' deferred as home_screen show HomeScreen;
+import 'package:route_app/screens/home/home_screen.dart' show HomeScreen;
+import 'package:route_app/screens/login/login_controller.dart' show LoginController;
+import 'package:route_app/screens/login/login_screen.dart' show LoginScreen;
+import 'package:route_app/screens/profile/profile_controller.dart' show ProfileController;
 import 'package:route_app/screens/profile/profile_screen.dart' show ProfileScreen;
-import 'package:route_app/screens/store/store_screen.dart' show StoreScreen;
 import 'package:route_app/screens/user/user_controller.dart' show UserController;
-import 'package:route_app/screens/user/user_screen.dart' deferred as user_screen show UserScreen;
+import 'package:route_app/screens/user/user_screen.dart' show UserScreen;
 
 enum RouteEnum {
-  home("/home", "home"),
-  user("/user", "user"),
-  profile("/profile", "profile"),
-  store("/store", "store"),
-  notFound("/404", "notFound");
+  home("/", "home"),
+  user("user", "user"),
+  profile("profile", "profile"),
+  login("login", "login"),
+  notFound("404", "notFound");
 
   final String path;
   final String name;
@@ -25,88 +25,70 @@ enum RouteEnum {
 }
 
 mixin AppRouter {
-  List<QRoute> get routes;
+  RouterDelegate<Object>? get routerDelegate;
   RouteInformationParser<Object>? get routeInformationParser;
 
-  void setup();
-  void navigate(String route);
-  void replace(String route);
   void back();
+  void navigate(String route);
+  void replaceAll(String route);
 }
 
 class AppRouterConcrete implements AppRouter {
   @override
-  RouteInformationParser<Object>? get routeInformationParser => const QRouteInformationParser();
+  RouterDelegate<Object>? get routerDelegate => _provider.routerDelegate;
 
   @override
-  List<QRoute> get routes => [
-        QRoute(
-          path: RouteEnum.home.path,
-          name: RouteEnum.home.name,
-          builder: () => home_screen.HomeScreen(
-            controller: HomeController(router: this),
-          ),
-          children: [_profileRoute],
-          middleware: [
-            DeferredLoader(home_screen.loadLibrary),
-          ],
-        ),
-        QRoute.withChild(
-          path: RouteEnum.user.path,
-          name: RouteEnum.user.name,
-          builderChild: (router) => user_screen.UserScreen(
-            controller: UserController(router: this),
-          ),
-          children: [_profileRoute],
-          middleware: [
-            DeferredLoader(user_screen.loadLibrary),
-            QMiddlewareBuilder(
-              onEnterFunc: () async => print('-- Enter Parent page --'),
-              onExitFunc: () async => print('-- Exit Parent page --'),
-              onMatchFunc: () async => print('-- Parent page Matched --'),
-            ),
-          ],
-        ),
-        QRoute.withChild(
-          path: RouteEnum.store.path,
-          name: RouteEnum.store.name,
-          builderChild: (router) => StoreScreen(),
-          children: [_profileRoute],
-        ),
-      ];
+  RouteInformationParser<Object>? get routeInformationParser => _provider.routeInformationParser;
 
-  QRoute get _profileRoute => QRoute(
-        path: RouteEnum.profile.path,
-        name: RouteEnum.profile.name,
-        builder: ProfileScreen.new,
+  GoRouter get _provider => GoRouter(
+        initialLocation: RouteEnum.home.path,
+        errorBuilder: (_, __) => NotFoundScreen(
+          controller: NotFoundController(router: this),
+        ),
+        routes: [
+          GoRoute(
+            path: "/" + RouteEnum.login.path,
+            builder: (_, __) => LoginScreen(
+              controller: LoginController(router: this),
+            ),
+          ),
+          GoRoute(
+            path: RouteEnum.home.path,
+            builder: (_, state) => HomeScreen(
+              controller: HomeController(router: this),
+            ),
+            routes: [
+              GoRoute(
+                path: RouteEnum.user.path,
+                builder: (_, __) => UserScreen(
+                  controller: UserController(router: this),
+                ),
+                routes: [
+                  GoRoute(
+                    path: RouteEnum.profile.path,
+                    builder: (_, __) => ProfileScreen(
+                      controller: ProfileController(router: this),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       );
 
   @override
-  void setup() {
-    QR.setUrlStrategy();
-
-    QR.settings.enableDebugLog = !kReleaseMode;
-    QR.settings.pagesType = kIsWeb ? QCustomPage() : QPlatformPage();
-
-    QR.settings.notFoundPage = QRoute(
-      path: RouteEnum.notFound.path,
-      builder: NotFoundScreen.new,
-    );
+  void back() {
+    _provider.pop();
   }
 
   @override
   void navigate(String route) {
-    final newPath = QR.currentPath + route;
-    QR.navigator.push(newPath);
+    _provider.go(route.startsWith("/") ? route : "/" + route);
   }
 
   @override
-  void replace(String route) {
-    QR.navigator.push(route);
-  }
-
-  @override
-  void back() {
-    QR.back();
+  void replaceAll(String route) {
+    _provider.pushReplacement(route.startsWith("/") ? route : "/" + route);
   }
 }

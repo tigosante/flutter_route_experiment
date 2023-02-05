@@ -8,7 +8,7 @@ class HomeController {
   final AppRouter _router;
 
   void gotToUser() {
-    _router.replace(RouteEnum.user.path);
+    _router.navigate(RouteEnum.user.path);
   }
 
   void gotToProfile() {

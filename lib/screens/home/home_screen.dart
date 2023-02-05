@@ -31,11 +31,6 @@ class HomeScreen extends StatelessWidget {
               onPressed: _controller.gotToProfile,
               child: Text("profile"),
             ),
-            _sizeBox,
-            ElevatedButton(
-              onPressed: () {},
-              child: Text("store"),
-            ),
           ],
         ),
       ),

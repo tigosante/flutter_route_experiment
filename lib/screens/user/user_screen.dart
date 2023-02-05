@@ -4,9 +4,12 @@ import 'package:route_app/screens/user/user_controller.dart' show UserController
 class UserScreen extends StatelessWidget {
   const UserScreen({
     super.key,
+    required int id,
     required UserController controller,
-  }) : _controller = controller;
+  })  : _id = id,
+        _controller = controller;
 
+  final int _id;
   final UserController _controller;
 
   Widget get _sizeBox => SizedBox(height: 16);
@@ -19,12 +22,7 @@ class UserScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text("User screen"),
-          _sizeBox,
-          ElevatedButton(
-            onPressed: _controller.back,
-            child: Text("back"),
-          ),
+          Text("User $_id"),
           _sizeBox,
           ElevatedButton(
             onPressed: _controller.gotToProfile,

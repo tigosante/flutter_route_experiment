@@ -7,10 +7,6 @@ class UserController {
 
   final AppRouter _router;
 
-  void back() {
-    _router.back();
-  }
-
   void gotToProfile() {
     _router.navigate(RouteEnum.profile.path);
   }

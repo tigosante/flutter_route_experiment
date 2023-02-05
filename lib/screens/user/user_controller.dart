@@ -1,4 +1,4 @@
-import 'package:route_app/router/app_router.dart' show AppRouter, RouteEnum;
+import 'package:route_app/router/import.dart' show AppRouter, RouteEnum;
 
 class UserController {
   UserController({

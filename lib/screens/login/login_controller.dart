@@ -1,4 +1,4 @@
-import 'package:route_app/router/app_router.dart' show AppRouter, RouteEnum;
+import 'package:route_app/router/import.dart' show AppRouter, RouteEnum;
 
 class LoginController {
   LoginController({
@@ -8,6 +8,6 @@ class LoginController {
   final AppRouter _router;
 
   void login() {
-    _router.replaceAll(RouteEnum.home.path);
+    _router.replaceAll(RouteEnum.home.path, queryParams: {"from": "login"});
   }
 }

@@ -1,31 +1,8 @@
-import 'package:flutter/foundation.dart' show kReleaseMode, protected;
 import 'package:flutter/material.dart' show RouteInformationParser, RouterDelegate;
-import 'package:go_router/go_router.dart' show GoRoute, GoRouter;
-import 'package:route_app/router/user_guards.dart' show UserGuards;
-import 'package:route_app/screens/404/not_found_controller.dart' show NotFoundController;
-import 'package:route_app/screens/404/not_found_screen.dart' show NotFoundScreen;
-import 'package:route_app/screens/home/home_controller.dart' show HomeController;
-import 'package:route_app/screens/home/home_screen.dart' show HomeScreen;
-import 'package:route_app/screens/login/login_controller.dart' show LoginController;
-import 'package:route_app/screens/login/login_screen.dart' show LoginScreen;
-import 'package:route_app/screens/profile/profile_screen.dart' show ProfileScreen;
-import 'package:route_app/screens/user/user_controller.dart' show UserController;
-import 'package:route_app/screens/user/user_screen.dart' deferred as user_screen show UserScreen;
-
-enum RouteEnum {
-  home("/", "home"),
-  user("user", "user"),
-  profile("profile", "profile"),
-  login("login", "login"),
-  notFound("404", "notFound");
-
-  final String path;
-  final String name;
-
-  const RouteEnum(this.path, this.name);
-}
+import 'package:go_router/go_router.dart' show GoRouter;
 
 mixin AppRouter {
+  void provider(GoRouter provider);
   RouterDelegate<Object>? get routerDelegate;
   RouteInformationParser<Object>? get routeInformationParser;
 
@@ -45,70 +22,22 @@ mixin AppRouter {
 }
 
 class AppRouterConcrete implements AppRouter {
-  static GoRouter? _providerInstance;
+  static late GoRouter _providerInstance;
+
+  final String _symbolQueryParams = "?";
 
   @override
-  RouterDelegate<Object>? get routerDelegate => _provider.routerDelegate;
+  RouterDelegate<Object>? get routerDelegate => _providerInstance.routerDelegate;
 
   @override
-  RouteInformationParser<Object>? get routeInformationParser => _provider.routeInformationParser;
+  RouteInformationParser<Object>? get routeInformationParser => _providerInstance.routeInformationParser;
 
-  GoRouter get _provider {
-    return _providerInstance ??
-        (_providerInstance = GoRouter(
-          debugLogDiagnostics: !kReleaseMode,
-          initialLocation: RouteEnum.home.path,
-          errorBuilder: (_, state) => NotFoundScreen(
-            message: state.error,
-            controller: NotFoundController(router: this),
-          ),
-          routes: [
-            GoRoute(
-              path: "/" + RouteEnum.login.path,
-              builder: (_, __) => LoginScreen(
-                controller: LoginController(router: this),
-              ),
-            ),
-            GoRoute(
-              path: RouteEnum.home.path,
-              builder: (_, state) => HomeScreen(
-                controller: HomeController(router: this),
-              ),
-              routes: [
-                GoRoute(
-                  path: RouteEnum.user.path + "/:id",
-                  redirect: (context, state) async => UserGuards().redirect(
-                    state: state,
-                    context: context,
-                    deferredLoading: user_screen.loadLibrary,
-                  ),
-                  builder: (_, state) {
-                    return user_screen.UserScreen(
-                      id: int.tryParse(state.params["id"]!)!,
-                      controller: UserController(router: this),
-                      name: state.queryParams["name"],
-                    );
-                  },
-                  routes: [
-                    GoRoute(
-                      path: RouteEnum.profile.path,
-                      builder: (_, state) => ProfileScreen(userTpe: state.queryParams["user_type"]),
-                    ),
-                  ],
-                ),
-                GoRoute(
-                  path: RouteEnum.profile.path,
-                  builder: (_, __) => ProfileScreen(),
-                ),
-              ],
-            ),
-          ],
-        ));
-  }
+  @override
+  void provider(GoRouter provider) => _providerInstance = provider;
 
   @override
   void back() {
-    _provider.pop();
+    _providerInstance.pop();
   }
 
   @override
@@ -120,31 +49,23 @@ class AppRouterConcrete implements AppRouter {
   }) {
     route = _fixRoutePath(route, params);
 
-    const symbol = "?";
-    String currentQueryParams = "";
-    String location = _provider.location;
+    final locationSplit = _splitRouteQueryParms(_providerInstance.location);
+    String location = locationSplit.first.endsWith("/") ? locationSplit.first.substring(1) : locationSplit.first;
 
-    if (location.contains(symbol)) {
-      final locationSplit = _split(location, symbol);
-      location = locationSplit.first;
+    route = location + route;
+    route += _getQueryParams(route, queryParams, paramsToJoin: joinQueryParams ? locationSplit.last : "");
 
-      if (joinQueryParams) currentQueryParams = locationSplit.last;
-    }
-
-    route = location + (location.endsWith("/") ? route.substring(1) : route);
-    route += _getQueryParams(route, queryParams, paramsToJoin: currentQueryParams);
-
-    _provider.push(route);
+    _providerInstance.push(route);
   }
 
-  @protected
+  @override
   void replaceAll(
     String route, {
     Map<String, dynamic> params = const {},
     Map<String, dynamic> queryParams = const {},
   }) {
     route = _fixRoutePath(route, params) + _getQueryParams(route, queryParams);
-    _provider.pushReplacement(route);
+    _providerInstance.pushReplacement(route);
   }
 
   String _fixRoutePath(String route, Map<String, dynamic> params) {
@@ -154,39 +75,42 @@ class AppRouterConcrete implements AppRouter {
   }
 
   String _getQueryParams(String route, Map<String, dynamic> queryParams, {String paramsToJoin = ""}) {
-    const symbol = "?";
-    const symbolJoin = "&";
-    String currentParams = "";
+    final params = _queryParams(route, queryParams, paramsToJoin: paramsToJoin);
+    if (params.isNotEmpty) return _symbolQueryParams + params;
+    return params;
+  }
 
-    if (route.contains(symbol)) currentParams = _split(route, symbol).last;
+  String _queryParams(String route, Map<String, dynamic> queryParams, {String paramsToJoin = ""}) {
+    String currentParams = _splitRouteQueryParms(route).last;
 
-    if (queryParams.isEmpty) {
-      if (currentParams.isEmpty) {
-        return paramsToJoin.isEmpty ? "" : symbol + paramsToJoin;
-      }
+    if (queryParams.isNotEmpty) {
+      final params = <String>[];
+      queryParams.forEach((key, value) => params.add("$key=$value"));
 
-      return symbol + _joinStrings([currentParams, paramsToJoin], symbolJoin);
+      return _joinMultQueryParams([currentParams, _joinMultQueryParams(params), paramsToJoin]);
     }
 
-    final params = <String>[];
-    queryParams.forEach((key, value) => params.add("$key=$value"));
+    if (currentParams.isNotEmpty) {
+      return _joinMultQueryParams([currentParams, paramsToJoin]);
+    }
 
-    if (currentParams.isNotEmpty) params.insert(0, currentParams);
-
-    return symbol + _joinStrings([params.join(symbolJoin), paramsToJoin], symbolJoin);
+    return paramsToJoin;
   }
 
-  List<String> _split(String value, String pattern) {
+  List<String> _splitRouteQueryParms(String value) {
     final patternReplaceSplit = "replace_here";
-    return value.replaceFirst(pattern, patternReplaceSplit).split(patternReplaceSplit);
+    final values = value.replaceFirst(_symbolQueryParams, patternReplaceSplit).split(patternReplaceSplit);
+
+    if (values.length == 1) return values..add("");
+    return values;
   }
 
-  String _joinStrings(List<String> values, String joinValue) {
+  String _joinMultQueryParams(List<String> values) {
     if (values.isEmpty) return "";
 
     values.removeWhere((element) => element.isEmpty);
     if (values.length == 1) return values.first;
 
-    return values.join(joinValue);
+    return values.join("&");
   }
 }

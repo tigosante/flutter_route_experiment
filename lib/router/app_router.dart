@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kReleaseMode;
+import 'package:flutter/foundation.dart' show kReleaseMode, protected;
 import 'package:flutter/material.dart' show RouteInformationParser, RouterDelegate;
 import 'package:go_router/go_router.dart' show GoRoute, GoRouter;
 import 'package:route_app/router/user_guards.dart' show UserGuards;
@@ -30,8 +30,18 @@ mixin AppRouter {
   RouteInformationParser<Object>? get routeInformationParser;
 
   void back();
-  void navigate(String route, {Map<String, dynamic> params = const {}});
-  void replaceAll(String route, {Map<String, dynamic> params = const {}});
+  void navigate(
+    String route, {
+    Map<String, dynamic> params = const {},
+    Map<String, dynamic> queryParams = const {},
+    bool joinQueryParams = false,
+  });
+
+  void replaceAll(
+    String route, {
+    Map<String, dynamic> params = const {},
+    Map<String, dynamic> queryParams = const {},
+  });
 }
 
 class AppRouterConcrete implements AppRouter {
@@ -76,12 +86,13 @@ class AppRouterConcrete implements AppRouter {
                     return user_screen.UserScreen(
                       id: int.tryParse(state.params["id"]!)!,
                       controller: UserController(router: this),
+                      name: state.queryParams["name"],
                     );
                   },
                   routes: [
                     GoRoute(
                       path: RouteEnum.profile.path,
-                      builder: (_, __) => ProfileScreen(),
+                      builder: (_, state) => ProfileScreen(userTpe: state.queryParams["user_type"]),
                     ),
                   ],
                 ),
@@ -101,23 +112,81 @@ class AppRouterConcrete implements AppRouter {
   }
 
   @override
-  void navigate(String route, {Map<String, dynamic> params = const {}}) {
+  void navigate(
+    String route, {
+    Map<String, dynamic> params = const {},
+    Map<String, dynamic> queryParams = const {},
+    bool joinQueryParams = false,
+  }) {
     route = _fixRoutePath(route, params);
 
-    final location = _provider.location;
+    const symbol = "?";
+    String currentQueryParams = "";
+    String location = _provider.location;
+
+    if (location.contains(symbol)) {
+      final locationSplit = _split(location, symbol);
+      location = locationSplit.first;
+
+      if (joinQueryParams) currentQueryParams = locationSplit.last;
+    }
+
     route = location + (location.endsWith("/") ? route.substring(1) : route);
+    route += _getQueryParams(route, queryParams, paramsToJoin: currentQueryParams);
 
     _provider.push(route);
   }
 
-  @override
-  void replaceAll(String route, {Map<String, dynamic> params = const {}}) {
-    _provider.pushReplacement(_fixRoutePath(route, params));
+  @protected
+  void replaceAll(
+    String route, {
+    Map<String, dynamic> params = const {},
+    Map<String, dynamic> queryParams = const {},
+  }) {
+    route = _fixRoutePath(route, params) + _getQueryParams(route, queryParams);
+    _provider.pushReplacement(route);
   }
 
   String _fixRoutePath(String route, Map<String, dynamic> params) {
     route = route.startsWith("/") ? route : "/" + route;
     if (params.isNotEmpty) route += "/" + params.values.join("/");
     return route;
+  }
+
+  String _getQueryParams(String route, Map<String, dynamic> queryParams, {String paramsToJoin = ""}) {
+    const symbol = "?";
+    const symbolJoin = "&";
+    String currentParams = "";
+
+    if (route.contains(symbol)) currentParams = _split(route, symbol).last;
+
+    if (queryParams.isEmpty) {
+      if (currentParams.isEmpty) {
+        return paramsToJoin.isEmpty ? "" : symbol + paramsToJoin;
+      }
+
+      return symbol + _joinStrings([currentParams, paramsToJoin], symbolJoin);
+    }
+
+    final params = <String>[];
+    queryParams.forEach((key, value) => params.add("$key=$value"));
+
+    if (currentParams.isNotEmpty) params.insert(0, currentParams);
+
+    return symbol + _joinStrings([params.join(symbolJoin), paramsToJoin], symbolJoin);
+  }
+
+  List<String> _split(String value, String pattern) {
+    final patternReplaceSplit = "replace_here";
+    return value.replaceFirst(pattern, patternReplaceSplit).split(patternReplaceSplit);
+  }
+
+  String _joinStrings(List<String> values, String joinValue) {
+    if (values.isEmpty) return "";
+
+    values.removeWhere((element) => element.isEmpty);
+    if (values.length == 1) return values.first;
+
+    return values.join(joinValue);
   }
 }

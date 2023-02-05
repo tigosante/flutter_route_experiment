@@ -8,6 +8,10 @@ class UserController {
   final AppRouter _router;
 
   void gotToProfile() {
-    _router.navigate(RouteEnum.profile.path);
+    _router.navigate(
+      RouteEnum.profile.path,
+      joinQueryParams: true,
+      queryParams: {"user_type": "adm"},
+    );
   }
 }

@@ -6,11 +6,14 @@ class UserScreen extends StatelessWidget {
     super.key,
     required int id,
     required UserController controller,
+    String? name,
   })  : _id = id,
+        _name = name,
         _controller = controller;
 
   final int _id;
   final UserController _controller;
+  final String? _name;
 
   Widget get _sizeBox => SizedBox(height: 16);
 
@@ -24,6 +27,7 @@ class UserScreen extends StatelessWidget {
         children: [
           Text("User $_id"),
           _sizeBox,
+          ..._name != null && _name!.isNotEmpty ? [Text("name: $_name"), _sizeBox] : [],
           ElevatedButton(
             onPressed: _controller.gotToProfile,
             child: Text("profile"),

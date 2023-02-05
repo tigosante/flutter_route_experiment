@@ -8,7 +8,7 @@ class HomeController {
   final AppRouter _router;
 
   void gotToUser() {
-    _router.navigate(RouteEnum.user.path, params: {"id": 1});
+    _router.navigate(RouteEnum.user.path, params: {"id": 1}, queryParams: {"name": "tiago"});
   }
 
   void gotToProfile() {

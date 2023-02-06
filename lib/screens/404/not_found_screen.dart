@@ -17,15 +17,13 @@ class NotFoundScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(!kReleaseMode ? "404\n${_message.toString()}" : "404"),
-          SizedBox(height: 16),
+          Text(!kReleaseMode ? '404\n$_message' : '404'),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _controller.gotToHome,
-            child: Text("back to home"),
+            child: const Text('back to home'),
           ),
         ],
       ),

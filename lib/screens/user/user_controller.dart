@@ -11,7 +11,7 @@ class UserController {
     _router.navigate(
       RouteEnum.profile.path,
       joinQueryParams: true,
-      queryParams: {"user_type": "adm"},
+      queryParams: {'user_type': 'adm'},
     );
   }
 }

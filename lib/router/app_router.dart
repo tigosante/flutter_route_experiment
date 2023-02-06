@@ -24,7 +24,7 @@ mixin AppRouter {
 class AppRouterConcrete implements AppRouter {
   static late GoRouter _providerInstance;
 
-  final String _symbolQueryParams = "?";
+  final String _symbolQueryParams = '?';
 
   @override
   RouterDelegate<Object>? get routerDelegate => _providerInstance.routerDelegate;
@@ -47,15 +47,15 @@ class AppRouterConcrete implements AppRouter {
     Map<String, dynamic> queryParams = const {},
     bool joinQueryParams = false,
   }) {
-    route = _fixRoutePath(route, params);
+    var routeFix = _fixRoutePath(route, params);
 
     final locationSplit = _splitRouteQueryParms(_providerInstance.location);
-    String location = locationSplit.first.endsWith("/") ? locationSplit.first.substring(1) : locationSplit.first;
+    final location = locationSplit.first.endsWith('/') ? locationSplit.first.substring(1) : locationSplit.first;
 
-    route = location + route;
-    route += _getQueryParams(route, queryParams, paramsToJoin: joinQueryParams ? locationSplit.last : "");
+    routeFix = location + routeFix;
+    routeFix += _getQueryParams(routeFix, queryParams, paramsToJoin: joinQueryParams ? locationSplit.last : '');
 
-    _providerInstance.push(route);
+    _providerInstance.push(routeFix);
   }
 
   @override
@@ -64,28 +64,29 @@ class AppRouterConcrete implements AppRouter {
     Map<String, dynamic> params = const {},
     Map<String, dynamic> queryParams = const {},
   }) {
-    route = _fixRoutePath(route, params) + _getQueryParams(route, queryParams);
-    _providerInstance.pushReplacement(route);
+    final routeFix = _fixRoutePath(route, params) + _getQueryParams(route, queryParams);
+    _providerInstance.pushReplacement(routeFix);
   }
 
   String _fixRoutePath(String route, Map<String, dynamic> params) {
-    route = route.startsWith("/") ? route : "/" + route;
-    if (params.isNotEmpty) route += "/" + params.values.join("/");
-    return route;
+    var routeFix = route.startsWith('/') ? route : '/$route';
+    if (params.isNotEmpty) routeFix += "/${params.values.join("/")}";
+
+    return routeFix;
   }
 
-  String _getQueryParams(String route, Map<String, dynamic> queryParams, {String paramsToJoin = ""}) {
+  String _getQueryParams(String route, Map<String, dynamic> queryParams, {String paramsToJoin = ''}) {
     final params = _queryParams(route, queryParams, paramsToJoin: paramsToJoin);
     if (params.isNotEmpty) return _symbolQueryParams + params;
     return params;
   }
 
-  String _queryParams(String route, Map<String, dynamic> queryParams, {String paramsToJoin = ""}) {
-    String currentParams = _splitRouteQueryParms(route).last;
+  String _queryParams(String route, Map<String, dynamic> queryParams, {String paramsToJoin = ''}) {
+    final currentParams = _splitRouteQueryParms(route).last;
 
     if (queryParams.isNotEmpty) {
       final params = <String>[];
-      queryParams.forEach((key, value) => params.add("$key=$value"));
+      queryParams.forEach((key, value) => params.add('$key=$value'));
 
       return _joinMultQueryParams([currentParams, _joinMultQueryParams(params), paramsToJoin]);
     }
@@ -98,19 +99,19 @@ class AppRouterConcrete implements AppRouter {
   }
 
   List<String> _splitRouteQueryParms(String value) {
-    final patternReplaceSplit = "replace_here";
+    const patternReplaceSplit = 'replace_here';
     final values = value.replaceFirst(_symbolQueryParams, patternReplaceSplit).split(patternReplaceSplit);
 
-    if (values.length == 1) return values..add("");
+    if (values.length == 1) return values..add('');
     return values;
   }
 
   String _joinMultQueryParams(List<String> values) {
-    if (values.isEmpty) return "";
+    if (values.isEmpty) return '';
 
     values.removeWhere((element) => element.isEmpty);
     if (values.length == 1) return values.first;
 
-    return values.join("&");
+    return values.join('&');
   }
 }

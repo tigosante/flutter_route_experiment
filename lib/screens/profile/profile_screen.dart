@@ -12,7 +12,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: _userTpe != null ? Text("type: $_userTpe") : Text("Profile screen"),
+        child: _userTpe != null ? Text('type: $_userTpe') : const Text('Profile screen'),
       ),
     );
   }

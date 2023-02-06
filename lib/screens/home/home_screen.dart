@@ -9,27 +9,25 @@ class HomeScreen extends StatelessWidget {
 
   final HomeController _controller;
 
-  Widget get _sizeBox => SizedBox(height: 16);
+  Widget get _sizeBox => const SizedBox(height: 16);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text("Home screen"),
+            const Text('Home screen'),
             _sizeBox,
             ElevatedButton(
               onPressed: _controller.gotToUser,
-              child: Text("user"),
+              child: const Text('user'),
             ),
             _sizeBox,
             ElevatedButton(
               onPressed: _controller.gotToProfile,
-              child: Text("profile"),
+              child: const Text('profile'),
             ),
           ],
         ),

@@ -8,6 +8,6 @@ class LoginController {
   final AppRouter _router;
 
   void login() {
-    _router.replaceAll(RouteEnum.home.path, queryParams: {"from": "login"});
+    _router.replaceAll(RouteEnum.home.path, queryParams: {'from': 'login'});
   }
 }

@@ -13,15 +13,13 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text("store screen"),
-          SizedBox(height: 16),
+          const Text('store screen'),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _controller.login,
-            child: Text("login"),
+            child: const Text('login'),
           ),
         ],
       ),

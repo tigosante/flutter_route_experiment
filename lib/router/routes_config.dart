@@ -26,7 +26,7 @@ Future<AppRouter> routesConfig(AppRouter router) async {
     ),
     routes: [
       route_provider.GoRoute(
-        path: "/" + enums.RouteEnum.login.path,
+        path: '/${enums.RouteEnum.login.path}',
         redirect: (_, __) => deferredLoad(login.loadLibrary),
         builder: (_, __) => login.LoginScreen(controller: login.LoginController(router: router)),
       ),
@@ -36,12 +36,12 @@ Future<AppRouter> routesConfig(AppRouter router) async {
         builder: (_, state) => home.HomeScreen(controller: home.HomeController(router: router)),
         routes: [
           route_provider.GoRoute(
-            path: enums.RouteEnum.user.path + "/:id",
+            path: '${enums.RouteEnum.user.path}/:id',
             redirect: guards.UserGuard(deferred: user.loadLibrary).redirect,
             builder: (_, state) {
               return user.UserScreen(
-                name: state.queryParams["name"],
-                id: int.tryParse(state.params["id"]!)!,
+                name: state.queryParams['name'],
+                id: int.tryParse(state.params['id']!)!,
                 controller: user.UserController(router: router),
               );
             },
@@ -49,14 +49,14 @@ Future<AppRouter> routesConfig(AppRouter router) async {
               route_provider.GoRoute(
                 path: enums.RouteEnum.profile.path,
                 redirect: (_, __) => deferredLoad(profile.loadLibrary),
-                builder: (_, state) => profile.ProfileScreen(userTpe: state.queryParams["user_type"]),
+                builder: (_, state) => profile.ProfileScreen(userTpe: state.queryParams['user_type']),
               ),
             ],
           ),
           route_provider.GoRoute(
             path: enums.RouteEnum.profile.path,
             redirect: (_, __) => deferredLoad(profile.loadLibrary),
-            builder: (_, state) => profile.ProfileScreen(userTpe: state.queryParams["user_type"]),
+            builder: (_, state) => profile.ProfileScreen(userTpe: state.queryParams['user_type']),
           ),
         ],
       ),

@@ -9,9 +9,9 @@ class UserGuard implements AppRouterGuard {
 
   @override
   Future<String?> redirect(BuildContext context, GoRouterState state) async {
-    final id = int.tryParse(state.params["id"] ?? "empty");
-    if (id == null) return "${state.subloc}/not-found";
+    final id = int.tryParse(state.params['id'] ?? 'empty');
+    if (id == null) return '${state.subloc}/not-found';
 
-    return await deferredLoad(_deferred);
+    return deferredLoad(_deferred);
   }
 }

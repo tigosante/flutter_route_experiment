@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({
+    super.key,
+    String? userTpe,
+  }) : _userTpe = userTpe;
+
+  final String? _userTpe;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text("Profile screen"),
-          SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {},
-            child: Text("back"),
-          ),
-        ],
+      body: Center(
+        child: _userTpe != null ? Text('type: $_userTpe') : const Text('Profile screen'),
       ),
     );
   }

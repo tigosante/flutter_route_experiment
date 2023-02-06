@@ -1,4 +1,4 @@
-import 'package:route_app/router/app_router.dart' show AppRouter, RouteEnum;
+import 'package:route_app/router/import.dart' show AppRouter, RouteEnum;
 
 class HomeController {
   HomeController({
@@ -8,7 +8,7 @@ class HomeController {
   final AppRouter _router;
 
   void gotToUser() {
-    _router.replace(RouteEnum.user.path);
+    _router.navigate(RouteEnum.user.path, params: {'id': 1}, queryParams: {'name': 'tiago'});
   }
 
   void gotToProfile() {

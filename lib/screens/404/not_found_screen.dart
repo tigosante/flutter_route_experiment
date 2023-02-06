@@ -1,21 +1,29 @@
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
+import 'package:route_app/screens/404/not_found_controller.dart' show NotFoundController;
 
 class NotFoundScreen extends StatelessWidget {
-  const NotFoundScreen({super.key});
+  const NotFoundScreen({
+    super.key,
+    dynamic message,
+    required NotFoundController controller,
+  })  : _message = message,
+        _controller = controller;
+
+  final dynamic _message;
+  final NotFoundController _controller;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text("404"),
-          SizedBox(height: 16),
+          Text(!kReleaseMode ? '404\n$_message' : '404'),
+          const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () {},
-            child: Text("back to home"),
+            onPressed: _controller.gotToHome,
+            child: const Text('back to home'),
           ),
         ],
       ),

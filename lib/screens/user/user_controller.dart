@@ -1,4 +1,4 @@
-import 'package:route_app/router/app_router.dart' show AppRouter, RouteEnum;
+import 'package:route_app/router/import.dart' show AppRouter, RouteEnum;
 
 class UserController {
   UserController({
@@ -7,11 +7,11 @@ class UserController {
 
   final AppRouter _router;
 
-  void back() {
-    _router.back();
-  }
-
   void gotToProfile() {
-    _router.navigate(RouteEnum.profile.path);
+    _router.navigate(
+      RouteEnum.profile.path,
+      joinQueryParams: true,
+      queryParams: {'user_type': 'adm'},
+    );
   }
 }

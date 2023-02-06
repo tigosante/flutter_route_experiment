@@ -1,112 +1,125 @@
-import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
-import 'package:flutter/material.dart' show RouteInformationParser;
-import 'package:qlevar_router/qlevar_router.dart'
-    show QCustomPage, QMiddlewareBuilder, QPlatformPage, QR, QRoute, QRouteInformationParser;
-import 'package:route_app/router/deferred_guard.dart' show DeferredLoader;
-import 'package:route_app/screens/404/not_found_screen.dart' show NotFoundScreen;
-import 'package:route_app/screens/home/home_controller.dart' show HomeController;
-import 'package:route_app/screens/home/home_screen.dart' deferred as home_screen show HomeScreen;
-import 'package:route_app/screens/profile/profile_screen.dart' show ProfileScreen;
-import 'package:route_app/screens/store/store_screen.dart' show StoreScreen;
-import 'package:route_app/screens/user/user_controller.dart' show UserController;
-import 'package:route_app/screens/user/user_screen.dart' deferred as user_screen show UserScreen;
-
-enum RouteEnum {
-  home("/home", "home"),
-  user("/user", "user"),
-  profile("/profile", "profile"),
-  store("/store", "store"),
-  notFound("/404", "notFound");
-
-  final String path;
-  final String name;
-
-  const RouteEnum(this.path, this.name);
-}
+import 'package:flutter/material.dart' show RouteInformationParser, RouterDelegate;
+import 'package:qlevar_router/qlevar_router.dart' show QRoute, QRouteInformationParser, QRouterDelegate;
+// ignore: implementation_imports
+import 'package:qlevar_router/src/qr.dart' show QRContext;
 
 mixin AppRouter {
-  List<QRoute> get routes;
+  void provider(QRContext provider, List<QRoute> routes);
+  RouterDelegate<Object>? get routerDelegate;
   RouteInformationParser<Object>? get routeInformationParser;
 
-  void setup();
-  void navigate(String route);
-  void replace(String route);
   void back();
+  void navigate(
+    String route, {
+    Map<String, dynamic> params = const {},
+    Map<String, dynamic> queryParams = const {},
+    bool joinQueryParams = false,
+  });
+
+  void replaceAll(
+    String route, {
+    Map<String, dynamic> params = const {},
+    Map<String, dynamic> queryParams = const {},
+  });
 }
 
 class AppRouterConcrete implements AppRouter {
+  static late QRContext _providerInstance;
+
+  final List<QRoute> _routes = [];
+  final String _symbolQueryParams = '?';
+
+  @override
+  RouterDelegate<Object>? get routerDelegate => QRouterDelegate(_routes);
+
   @override
   RouteInformationParser<Object>? get routeInformationParser => const QRouteInformationParser();
 
   @override
-  List<QRoute> get routes => [
-        QRoute(
-          path: RouteEnum.home.path,
-          name: RouteEnum.home.name,
-          builder: () => home_screen.HomeScreen(
-            controller: HomeController(router: this),
-          ),
-          children: [_profileRoute],
-          middleware: [
-            DeferredLoader(home_screen.loadLibrary),
-          ],
-        ),
-        QRoute.withChild(
-          path: RouteEnum.user.path,
-          name: RouteEnum.user.name,
-          builderChild: (router) => user_screen.UserScreen(
-            controller: UserController(router: this),
-          ),
-          children: [_profileRoute],
-          middleware: [
-            DeferredLoader(user_screen.loadLibrary),
-            QMiddlewareBuilder(
-              onEnterFunc: () async => print('-- Enter Parent page --'),
-              onExitFunc: () async => print('-- Exit Parent page --'),
-              onMatchFunc: () async => print('-- Parent page Matched --'),
-            ),
-          ],
-        ),
-        QRoute.withChild(
-          path: RouteEnum.store.path,
-          name: RouteEnum.store.name,
-          builderChild: (router) => StoreScreen(),
-          children: [_profileRoute],
-        ),
-      ];
-
-  QRoute get _profileRoute => QRoute(
-        path: RouteEnum.profile.path,
-        name: RouteEnum.profile.name,
-        builder: ProfileScreen.new,
-      );
-
-  @override
-  void setup() {
-    QR.setUrlStrategy();
-
-    QR.settings.enableDebugLog = !kReleaseMode;
-    QR.settings.pagesType = kIsWeb ? QCustomPage() : QPlatformPage();
-
-    QR.settings.notFoundPage = QRoute(
-      path: RouteEnum.notFound.path,
-      builder: NotFoundScreen.new,
-    );
-  }
-
-  @override
-  void navigate(String route) {
-    final newPath = QR.currentPath + route;
-    QR.navigator.push(newPath);
-  }
-
-  @override
-  void replace(String route) {
-    QR.navigator.push(route);
+  void provider(QRContext provider, List<QRoute> routes) {
+    _routes
+      ..clear()
+      ..addAll(routes);
+    _providerInstance = provider;
   }
 
   @override
   void back() {
-    QR.back();
+    _providerInstance.back();
+  }
+
+  @override
+  void navigate(
+    String route, {
+    Map<String, dynamic> params = const {},
+    Map<String, dynamic> queryParams = const {},
+    bool joinQueryParams = false,
+  }) {
+    var routeFix = _fixRoutePath(route, params);
+
+    final locationSplit = _splitRouteQueryParms(_providerInstance.currentPath);
+    final location = locationSplit.first.endsWith('/') ? locationSplit.first.substring(1) : locationSplit.first;
+
+    routeFix = location + routeFix;
+    routeFix += _getQueryParams(routeFix, queryParams, paramsToJoin: joinQueryParams ? locationSplit.last : '');
+
+    _providerInstance.navigator.push(routeFix);
+  }
+
+  @override
+  void replaceAll(
+    String route, {
+    Map<String, dynamic> params = const {},
+    Map<String, dynamic> queryParams = const {},
+  }) {
+    final routeFix = _fixRoutePath(route, params) + _getQueryParams(route, queryParams);
+    _providerInstance.navigator.replaceAll(routeFix);
+  }
+
+  String _fixRoutePath(String route, Map<String, dynamic> params) {
+    var routeFix = route.startsWith('/') ? route : '/$route';
+    if (params.isNotEmpty) routeFix += "/${params.values.join("/")}";
+
+    return routeFix;
+  }
+
+  String _getQueryParams(String route, Map<String, dynamic> queryParams, {String paramsToJoin = ''}) {
+    final params = _queryParams(route, queryParams, paramsToJoin: paramsToJoin);
+    if (params.isNotEmpty) return _symbolQueryParams + params;
+    return params;
+  }
+
+  String _queryParams(String route, Map<String, dynamic> queryParams, {String paramsToJoin = ''}) {
+    final currentParams = _splitRouteQueryParms(route).last;
+
+    if (queryParams.isNotEmpty) {
+      final params = <String>[];
+      queryParams.forEach((key, value) => params.add('$key=$value'));
+
+      return _joinMultQueryParams([currentParams, _joinMultQueryParams(params), paramsToJoin]);
+    }
+
+    if (currentParams.isNotEmpty) {
+      return _joinMultQueryParams([currentParams, paramsToJoin]);
+    }
+
+    return paramsToJoin;
+  }
+
+  List<String> _splitRouteQueryParms(String value) {
+    const patternReplaceSplit = 'replace_here';
+    final values = value.replaceFirst(_symbolQueryParams, patternReplaceSplit).split(patternReplaceSplit);
+
+    if (values.length == 1) return values..add('');
+    return values;
+  }
+
+  String _joinMultQueryParams(List<String> values) {
+    if (values.isEmpty) return '';
+
+    values.removeWhere((element) => element.isEmpty);
+    if (values.length == 1) return values.first;
+
+    return values.join('&');
   }
 }

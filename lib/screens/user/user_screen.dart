@@ -4,31 +4,31 @@ import 'package:route_app/screens/user/user_controller.dart' show UserController
 class UserScreen extends StatelessWidget {
   const UserScreen({
     super.key,
+    required int id,
     required UserController controller,
-  }) : _controller = controller;
+    String? name,
+  })  : _id = id,
+        _name = name,
+        _controller = controller;
 
+  final int _id;
   final UserController _controller;
+  final String? _name;
 
-  Widget get _sizeBox => SizedBox(height: 16);
+  Widget get _sizeBox => const SizedBox(height: 16);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text("User screen"),
+          Text('User $_id'),
           _sizeBox,
-          ElevatedButton(
-            onPressed: _controller.back,
-            child: Text("back"),
-          ),
-          _sizeBox,
+          ..._name != null && _name!.isNotEmpty ? [Text('name: $_name'), _sizeBox] : [],
           ElevatedButton(
             onPressed: _controller.gotToProfile,
-            child: Text("profile"),
+            child: const Text('profile'),
           ),
         ],
       ),

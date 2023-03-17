@@ -25,9 +25,9 @@ class UserRoute implements AppRoute {
       path: '${RouteEnum.user.path}/:id',
       redirect: (_, __) => deferredLoad(_loadBinds),
       builder: (_, state) => user_screen.UserScreen(
+        controller: _dependency.get(),
         name: state.queryParams['name'],
         id: int.tryParse(state.params['id']!)!,
-        controller: _dependency.get(),
       ),
       routes: [
         ProfileRoute().route(),

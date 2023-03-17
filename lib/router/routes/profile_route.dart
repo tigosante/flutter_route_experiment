@@ -8,8 +8,8 @@ class ProfileRoute implements AppRoute {
   GoRoute route() {
     return GoRoute(
       path: RouteEnum.profile.path,
-      redirect: (_, __) => deferredLoad(profile_screen.loadLibrary),
       builder: (_, __) => profile_screen.ProfileScreen(),
+      redirect: (_, __) => deferredLoad(profile_screen.loadLibrary),
     );
   }
 }

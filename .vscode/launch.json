@@ -13,6 +13,11 @@
         "--web-renderer",
         "canvaskit"
       ]
+    },
+    {
+      "name": "moble-DEV",
+      "request": "launch",
+      "type": "dart",
     }
   ]
 }

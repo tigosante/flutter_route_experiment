@@ -19,14 +19,14 @@ Future<AppRouter> routesConfig(DependencyInjection dependency) async {
   final provider = route_provider.GoRouter(
     debugLogDiagnostics: !kReleaseMode,
     initialLocation: enums.RouteEnum.home.path,
+    routes: [
+      home_route.HomeRoute(dependency: dependency).route(),
+      login_route.LoginRoute(dependency: dependency).route(),
+    ],
     errorBuilder: (_, state) => not_found.NotFoundScreen(
       message: state.error,
       controller: not_found.NotFoundController(router: dependency.get()),
     ),
-    routes: [
-      login_route.LoginRoute(dependency: dependency).route(),
-      home_route.HomeRoute(dependency: dependency).route(),
-    ],
   );
 
   return dependency.get<AppRouter>()..provider(provider);

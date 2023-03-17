@@ -24,7 +24,7 @@ mixin AppRouter {
 class AppRouterConcrete implements AppRouter {
   static late GoRouter _providerInstance;
 
-  final String _symbolQueryParams = '?';
+  static const String _symbolQueryParams = '?';
 
   @override
   RouterDelegate<Object>? get routerDelegate => _providerInstance.routerDelegate;

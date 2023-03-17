@@ -3,8 +3,8 @@ import 'package:route_app/screens/login/login_controller.dart' show LoginControl
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({
-    super.key,
     required LoginController controller,
+    super.key,
   }) : _controller = controller;
 
   final LoginController _controller;

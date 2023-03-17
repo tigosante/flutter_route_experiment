@@ -3,8 +3,8 @@ import 'package:route_app/router/import.dart' show AppRouter;
 
 class Application extends StatelessWidget {
   const Application({
-    super.key,
     required AppRouter router,
+    super.key,
   }) : _router = router;
 
   final AppRouter _router;

@@ -3,9 +3,9 @@ import 'package:route_app/screens/user/user_controller.dart' show UserController
 
 class UserScreen extends StatelessWidget {
   const UserScreen({
-    super.key,
     required int id,
     required UserController controller,
+    super.key,
     String? name,
   })  : _id = id,
         _name = name,

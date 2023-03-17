@@ -4,9 +4,9 @@ import 'package:route_app/screens/404/not_found_controller.dart' show NotFoundCo
 
 class NotFoundScreen extends StatelessWidget {
   const NotFoundScreen({
+    required NotFoundController controller,
     super.key,
     dynamic message,
-    required NotFoundController controller,
   })  : _message = message,
         _controller = controller;
 

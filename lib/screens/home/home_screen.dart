@@ -3,8 +3,8 @@ import 'package:route_app/screens/home/home_controller.dart' show HomeController
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
-    super.key,
     required HomeController controller,
+    super.key,
   }) : _controller = controller;
 
   final HomeController _controller;

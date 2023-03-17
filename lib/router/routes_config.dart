@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart' deferred as route_provider show GoRout
 import 'package:route_app/router/guards/import.dart' deferred as guards show UserGuard;
 import 'package:route_app/router/import.dart' show AppRouter, deferredLoad;
 import 'package:route_app/router/route_enum.dart' deferred as enums show RouteEnum;
-import 'package:route_app/screens/404/import.dart' deferred as not_found show NotFoundScreen, NotFoundController;
+import 'package:route_app/screens/404/import.dart' deferred as not_found show NotFoundController, NotFoundScreen;
 import 'package:route_app/screens/home/import.dart' deferred as home;
 import 'package:route_app/screens/login/import.dart' deferred as login;
 import 'package:route_app/screens/profile/import.dart' deferred as profile;
